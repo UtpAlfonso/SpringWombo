@@ -14,11 +14,6 @@ services:
     # Región donde se desplegará el servicio.
     region: oregon # Elige una región, ej: 'oregon', 'frankfurt'
     # Configuración de la salud de la aplicación.
-    healthCheck:
-      # Render hará una petición a esta ruta para ver si la app está funcionando.
-      path: /actuator/health
-      initialDelaySeconds: 120 # Dale tiempo a Spring para que inicie
-
     # --- Variables de Entorno ---
     # Aquí definimos las variables que leerá tu application.properties.
     envVars:
