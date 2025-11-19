@@ -1,34 +1,21 @@
-# --- Etapa 1: Construcción (Build Stage) ---
-# Usamos una imagen de Maven con Java 17 para compilar el proyecto
-FROM maven:3.8.5-openjdk-17 AS build
+# --- Etapa 1: Construcción ---
+FROM maven:3.8.7-eclipse-temurin-17 AS build
 
-# Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiamos el archivo pom.xml primero para aprovechar la caché de capas de Docker
 COPY pom.xml .
-
-# Descargamos las dependencias
 RUN mvn dependency:go-offline
 
-# Copiamos el resto del código fuente
 COPY src ./src
-
-# Empaquetamos la aplicación en un archivo .jar, saltando los tests
 RUN mvn package -DskipTests
 
-# --- Etapa 2: Ejecución (Runtime Stage) ---
-# Usamos una imagen de Java 17 mucho más ligera para ejecutar la aplicación
-FROM openjdk:17-jdk-slim
+# --- Etapa 2: Ejecución ---
+FROM eclipse-temurin:17-jre
 
-# Establecemos el directorio de trabajo
 WORKDIR /app
 
-# Copiamos solo el archivo .jar compilado desde la etapa de construcción
 COPY --from=build /app/target/*.jar app.jar
 
-# Exponemos el puerto en el que correrá la aplicación
 EXPOSE 8076
 
-# El comando que se ejecutará cuando el contenedor inicie
 ENTRYPOINT ["java", "-jar", "app.jar"]
