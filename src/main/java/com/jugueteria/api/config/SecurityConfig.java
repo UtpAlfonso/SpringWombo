@@ -56,7 +56,8 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:4200",
                 "https://*.ngrok-free.dev",
-                "https://*.loca.lt"
+                "https://*.loca.lt",
+                "https://jugueteria-api.onrender.com"
         ));
         
         // ✅ Métodos permitidos
