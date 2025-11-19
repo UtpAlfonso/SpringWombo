@@ -8,7 +8,7 @@ services:
     runtime: docker
     # Ruta al Dockerfile dentro de tu repositorio.
     # Si está en la raíz, es solo './Dockerfile'.
-    dockerfilePath: ./Dockerfile 
+    dockerfilePath: ./DockerFile 
     # Propiedades de la instancia (puedes empezar con el plan gratuito)
     plan: free 
     # Región donde se desplegará el servicio.
