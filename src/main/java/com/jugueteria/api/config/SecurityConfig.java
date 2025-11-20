@@ -57,7 +57,8 @@ public class SecurityConfig {
                 "http://localhost:4200",
                 "https://*.ngrok-free.dev",
                 "https://*.loca.lt",
-                "https://jugueteria-api.onrender.com"
+                "https://jugueteria-api.onrender.com",
+                "https://womboangular.onrender.com"
         ));
         
         // ✅ Métodos permitidos

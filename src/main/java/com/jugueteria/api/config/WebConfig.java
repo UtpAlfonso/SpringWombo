@@ -15,7 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
                     "http://localhost:4200",
                     "https://hyperlogical-luz-subfastigiate.ngrok-free.dev",
                     "http://hyperlogical-luz-subfastigiate.ngrok-free.dev",
-                    "https://jugueteria-api.onrender.com"
+                    "https://jugueteria-api.onrender.com",
+                    "https://womboangular.onrender.com"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
