@@ -71,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void updateOrderStatusFromWebhook(Long orderId, String status) {
         logger.info("Procesando webhook para Pedido #{} con nuevo estado de MP: {}", orderId, status);
-        Pedido pedido = pedidoRepository.findByIdWithLock(orderId)
+        Pedido pedido = pedidoRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Webhook: Pedido no encontrado con id: " + orderId));
 
         if (!"PENDIENTE".equalsIgnoreCase(pedido.getEstado())) {
