@@ -1,71 +1,88 @@
 package com.jugueteria.api.services.impl;
 
 import com.jugueteria.api.entity.Pedido;
+import com.jugueteria.api.entity.Usuario;
 import com.jugueteria.api.services.EmailService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
+import lombok.RequiredArgsConstructor; // Opcional, ya que usaremos @Value
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import com.jugueteria.api.entity.Usuario;
 
 @Service
-@RequiredArgsConstructor
+// Quitamos @RequiredArgsConstructor porque inyectaremos valores del properties con @Value
 public class EmailServiceImpl implements EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${resend.api.key}")
+    private String apiKey;
+
+    @Value("${resend.from.email}")
+    private String fromEmail; // Ej: onboarding@resend.dev
 
     @Override
-    @Async // Se ejecuta en un hilo separado para no bloquear la respuesta al usuario
+    @Async // Sigue siendo asíncrono para no trabar la venta
     public void sendOrderConfirmationEmail(Pedido pedido) {
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+            // 1. Inicializar Resend
+            Resend resend = new Resend(apiKey);
 
-            helper.setTo(pedido.getCliente().getEmail());
-            helper.setSubject("¡Confirmación de tu pedido #" + pedido.getId() + " en Juguetería Fantasía!");
-
-            // Construir el cuerpo del correo en HTML
+            // 2. Construir tu HTML (Tu lógica original intacta)
             String htmlMsg = "<h3>¡Gracias por tu compra, " + pedido.getCliente().getNombre() + "!</h3>"
                     + "<p>Tu pedido con ID #" + pedido.getId() + " ha sido recibido y está siendo procesado.</p>"
                     + "<p><b>Total:</b> S/. " + pedido.getTotal() + "</p>"
                     + "<p><b>Dirección de Envío:</b> " + pedido.getDireccionEnvio() + "</p>"
                     + "<p>Pronto recibirás otra notificación cuando tu pedido sea enviado.</p>"
                     + "<p>Saludos,<br>El equipo de Juguetería Fantasía</p>";
-            
-            helper.setText(htmlMsg, true); // true indica que el texto es HTML
 
-            mailSender.send(mimeMessage);
-        } catch (MessagingException e) {
-            // En un proyecto real, aquí se manejaría el error (ej. log, reintentos)
+            // 3. Configurar el envío
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("Juguetería Fantasía <" + fromEmail + ">") // Remitente
+                    .to(pedido.getCliente().getEmail())              // Destinatario
+                    .subject("¡Confirmación de tu pedido #" + pedido.getId() + " en Juguetería Fantasía!")
+                    .html(htmlMsg)
+                    .build();
+
+            // 4. Enviar (Viaja por HTTP puerto 443, Render NO lo bloquea)
+            CreateEmailResponse data = resend.emails().send(params);
+            System.out.println("Email confirmación enviado. ID: " + data.getId());
+
+        } catch (ResendException e) {
             System.err.println("Error al enviar el correo de confirmación: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error inesperado en email: " + e.getMessage());
         }
     }
-    
+
     @Override
     @Async
     public void sendPasswordResetEmail(Usuario usuario, String token) {
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+            Resend resend = new Resend(apiKey);
 
-            helper.setTo(usuario.getEmail());
-            helper.setSubject("Restablece tu contraseña en Juguetería Fantasía");
-
-            // La URL debe apuntar a tu frontend, incluyendo el token
+            // Tu URL original
             String resetUrl = "https://womboangular.onrender.com/reset-password?token=" + token;
 
+            // Tu HTML original
             String htmlMsg = "<h3>Hola, " + usuario.getNombre() + "</h3>"
                     + "<p>Hemos recibido una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:</p>"
                     + "<a href=\"" + resetUrl + "\">Restablecer mi contraseña</a>"
                     + "<p>Si no solicitaste esto, puedes ignorar este correo.</p>"
                     + "<p>El enlace expirará en 1 hora.</p>";
-            
-            helper.setText(htmlMsg, true);
-            mailSender.send(mimeMessage);
-        } catch (MessagingException e) {
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("Juguetería Fantasía <" + fromEmail + ">")
+                    .to(usuario.getEmail())
+                    .subject("Restablece tu contraseña en Juguetería Fantasía")
+                    .html(htmlMsg)
+                    .build();
+
+            CreateEmailResponse data = resend.emails().send(params);
+            System.out.println("Email recuperación enviado. ID: " + data.getId());
+
+        } catch (ResendException e) {
             System.err.println("Error al enviar el correo de reseteo: " + e.getMessage());
         }
     }
