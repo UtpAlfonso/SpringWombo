@@ -55,7 +55,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setSubject("Restablece tu contraseña en Juguetería Fantasía");
 
             // La URL debe apuntar a tu frontend, incluyendo el token
-            String resetUrl = "http://localhost:4200/reset-password?token=" + token;
+            String resetUrl = "https://womboangular.onrender.com/reset-password?token=" + token;
 
             String htmlMsg = "<h3>Hola, " + usuario.getNombre() + "</h3>"
                     + "<p>Hemos recibido una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:</p>"
