@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Lock; 
+import jakarta.persistence.LockModeType;
+import java.util.Optional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,7 +23,12 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
      *
      * @param cliente El usuario (con rol CLIENT) cuyos pedidos se quieren encontrar.
      * @return una Lista de Pedidos.
+     * 
      */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Pedido p WHERE p.id = :id")
+    Optional<Pedido> findByIdWithLock(@Param("id") Long id);
+
     List<Pedido> findByCliente(Usuario cliente);
     @Query("SELECT new com.jugueteria.api.dto.response.DailySaleDto(CAST(p.fechaPedido AS date), SUM(p.total)) " +
            "FROM Pedido p " +
