@@ -92,8 +92,9 @@ public class OrderServiceImpl implements OrderService {
                 carritoItemRepository.deleteAll(cartItems); 
                 logger.info("Stock descontado y carrito limpiado para el usuario {}.", pedido.getCliente().getEmail());
             }
-            
-            emailService.sendOrderConfirmationEmail(pedido);
+
+            byte[] pdfBytes = pdfService.generateOrderInvoicePdf(pedido);
+            emailService.sendOrderConfirmationWithInvoice(pedido, pdfBytes);
             
         } else {
             logger.warn("Pago FALLIDO para Pedido #{}. Actualizando a 'PAGO_FALLIDO'.", orderId);
